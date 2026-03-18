@@ -1,0 +1,15 @@
+{
+  "name": "research-radar-mvp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Full-stack MVP for Research Radar",
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node --watch server.mjs",
+    "start:static": "python3 -m http.server 4173",
+    "migrate": "node scripts/run-migrations.mjs"
+  },
+  "dependencies": {
+    "pg": "^8.16.3"
+  }
+}

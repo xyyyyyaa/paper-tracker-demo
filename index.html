@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Research Radar</title>
+    <meta
+      name="description"
+      content="Research Radar 帮科研用户追踪方向最新论文，快速筛选值得读的工作。"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <button class="brand-button" data-route-home>
+          <span class="brand-mark">RR</span>
+          <span class="brand-copy">
+            <strong>Research Radar</strong>
+            <span>Research tracking and reading decisions</span>
+          </span>
+        </button>
+        <nav class="topbar-nav">
+          <a href="#guide">How It Works</a>
+          <a href="#results?topic=RAG%20evaluation&range=30">Demo</a>
+          <a href="https://github.com/" target="_blank" rel="noreferrer">GitHub</a>
+        </nav>
+      </header>
+
+      <main id="app" class="page-root" aria-live="polite"></main>
+    </div>
+
+    <template id="home-template">
+      <section class="hero-panel">
+        <div class="hero-copy">
+          <p class="eyebrow">Research tracking for AI teams and students</p>
+          <h1>
+            <span>追踪你的研究方向</span>
+            <span>快速找到值得读的</span>
+            <span>新论文</span>
+          </h1>
+          <p class="hero-title-en">Track your research topic and surface the papers worth reading first.</p>
+          <p class="hero-text">
+            输入关键词，自动整理最新论文、结构化总结核心贡献，并给出阅读建议。不用反复刷
+            arXiv 和 Scholar，也能快速掌握方向进展。
+          </p>
+
+          <div class="hero-points">
+            <span class="detail-chip">最新论文追踪</span>
+            <span class="detail-chip">结构化总结</span>
+            <span class="detail-chip">阅读优先级判断</span>
+          </div>
+
+          <form id="search-form" class="search-panel">
+            <label class="field-label" for="topic-input">研究方向 / 关键词</label>
+            <div class="search-row">
+              <input
+                id="topic-input"
+                name="topic"
+                type="text"
+                maxlength="100"
+                placeholder="例如：Multimodal system identification / RAG evaluation / Time series forecasting with LLMs"
+                autocomplete="off"
+              />
+              <div class="range-picker">
+                <label class="field-label" for="time-range">时间范围</label>
+                <select id="time-range" name="range">
+                  <option value="7">最近 7 天</option>
+                  <option value="30" selected>最近 30 天</option>
+                  <option value="90">最近 90 天</option>
+                </select>
+              </div>
+              <button type="submit" class="cta-button" id="search-submit">开始追踪</button>
+            </div>
+            <p class="form-hint" id="form-hint">支持英文关键词、短语和简单中文描述。</p>
+            <p class="form-error" id="form-error" role="alert"></p>
+          </form>
+
+          <div class="example-block">
+            <div class="example-head">
+              <span>试试这些方向</span>
+            </div>
+            <div class="example-grid">
+              <button class="example-chip" data-example="Multimodal system identification">
+                Multimodal system identification
+              </button>
+              <button class="example-chip" data-example="RAG evaluation">RAG evaluation</button>
+              <button class="example-chip" data-example="AI agent safety">AI agent safety</button>
+              <button class="example-chip" data-example="Time series forecasting with LLMs">
+                Time series forecasting with LLMs
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <aside class="hero-aside">
+          <div class="signal-card">
+            <p class="signal-label">This week's signal</p>
+            <h2>从搜索结果，升级到可判断的论文流</h2>
+            <p class="signal-text">
+              右侧会跟随你的输入做一次即时检索预演，把“开始追踪”之后最重要的信息先展示出来。
+            </p>
+
+            <div class="live-query">
+              <div>
+                <p class="section-kicker" id="preview-mode-label">示例状态</p>
+                <strong id="preview-topic">RAG evaluation</strong>
+              </div>
+              <span class="tag priority-high" id="preview-range-label">最近 30 天</span>
+            </div>
+
+            <div class="preview-scan" aria-live="polite">
+              <span class="preview-scan-dot"></span>
+              <span id="preview-scan-text">当前显示示例结果，点击左侧“开始追踪”后更新。</span>
+            </div>
+
+            <div class="signal-metrics">
+              <div class="signal-metric">
+                <strong id="preview-paper-count">3</strong>
+                <span>近 30 天新增</span>
+              </div>
+              <div class="signal-metric">
+                <strong id="preview-reading-count">3</strong>
+                <span>优先阅读建议</span>
+              </div>
+              <div class="signal-metric">
+                <strong id="preview-framework-count">6</strong>
+                <span>详情固定字段</span>
+              </div>
+            </div>
+
+            <div class="preview-panel">
+              <div class="preview-head">
+                <div>
+                  <p class="section-kicker">Preview</p>
+                  <h3 id="preview-heading">RAG evaluation</h3>
+                </div>
+                <span class="tag priority-high" id="preview-priority">高优先方向</span>
+              </div>
+
+              <div class="preview-framework">
+                <p class="section-kicker">详情页固定包含 6 个字段</p>
+                <div class="preview-framework-grid" id="preview-framework">
+                  <span>研究问题</span>
+                  <span>方法概述</span>
+                  <span>创新点</span>
+                  <span>差异分析</span>
+                  <span>局限风险</span>
+                  <span>阅读建议</span>
+                </div>
+              </div>
+
+              <div class="preview-stack" id="preview-stack">
+                <div class="preview-card">
+                  <div class="preview-copy">
+                    <strong>RAG-X: Systematic Diagnosis...</strong>
+                    <p>拆分 retriever 和 generator 评测，适合先看。</p>
+                  </div>
+                  <div class="preview-card-footer">
+                    <div class="tag-row">
+                      <span class="tag priority-high">精读</span>
+                      <span class="tag relevance-high">高相关</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="preview-actions">
+                <button class="ghost-button compact-button" id="preview-more-button" type="button">更多</button>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="value-strip">
+        <article class="value-card">
+          <p class="value-index">01</p>
+          <h3>追踪最新论文</h3>
+          <p>围绕你的研究方向，自动整理近期新增论文。</p>
+        </article>
+        <article class="value-card">
+          <p class="value-index">02</p>
+          <h3>结构化看懂内容</h3>
+          <p>快速提炼问题、方法、创新点和局限。</p>
+        </article>
+        <article class="value-card">
+          <p class="value-index">03</p>
+          <h3>帮你决定先看哪篇</h3>
+          <p>给出阅读优先级和推荐理由，降低筛选成本。</p>
+        </article>
+      </section>
+
+      <section class="guide-strip">
+        <article class="guide-panel">
+          <p class="section-kicker">First time here?</p>
+          <h2>第一次使用，按这个顺序就够了</h2>
+          <div class="guide-steps">
+            <div class="guide-step">
+              <span>1</span>
+              <div>
+                <strong>输入方向</strong>
+                <p>输入研究主题、关键词或问题描述，例如 `RAG evaluation`。</p>
+              </div>
+            </div>
+            <div class="guide-step">
+              <span>2</span>
+              <div>
+                <strong>看结果页</strong>
+                <p>先看方向速览，再扫论文卡片，快速确定值得点开的候选。</p>
+              </div>
+            </div>
+            <div class="guide-step">
+              <span>3</span>
+              <div>
+                <strong>做阅读决策</strong>
+                <p>进入详情页后，优先看“建议精读/快速浏览”和推荐理由。</p>
+              </div>
+            </div>
+          </div>
+          <div class="query-actions">
+            <a class="ghost-button" href="#guide">查看完整使用说明</a>
+            <a class="cta-link" href="#results?topic=RAG%20evaluation&range=30&sort=smart">打开示例结果</a>
+          </div>
+        </article>
+      </section>
+    </template>
+
+    <template id="guide-template">
+      <section class="guide-layout">
+        <article class="guide-hero">
+          <p class="section-kicker">How It Works</p>
+          <h1 class="detail-title">Research Radar 使用说明</h1>
+          <p class="detail-subtitle">
+            这是一个面向科研用户的论文追踪与阅读决策工具。你不需要先读很多论文，再判断值不值得看；它的目标是先帮你缩小范围，再帮你决定优先级。
+          </p>
+          <div class="query-actions">
+            <a class="cta-link" href="#home">返回首页</a>
+            <a class="ghost-button" href="#results?topic=RAG%20evaluation&range=30&sort=smart">查看示例</a>
+          </div>
+        </article>
+
+        <section class="guide-columns">
+          <article class="guide-card">
+            <p class="value-index">01</p>
+            <h2>开始方式</h2>
+            <p>在首页输入研究方向、关键词或一个足够具体的问题描述。</p>
+            <ul class="signal-list">
+              <li>例如：`RAG evaluation`</li>
+              <li>例如：`AI agent safety`</li>
+              <li>例如：`Time series forecasting with LLMs`</li>
+            </ul>
+          </article>
+
+          <article class="guide-card">
+            <p class="value-index">02</p>
+            <h2>先看什么</h2>
+            <p>进入结果页后，不要先逐篇读摘要，先看上方的方向速览。</p>
+            <ul class="signal-list">
+              <li>最近新增了多少篇</li>
+              <li>近期关注焦点是什么</li>
+              <li>系统建议优先关注哪 3 篇</li>
+            </ul>
+          </article>
+
+          <article class="guide-card">
+            <p class="value-index">03</p>
+            <h2>如何筛论文</h2>
+            <p>论文卡片承担“初筛”作用。优先看这三项：</p>
+            <ul class="signal-list">
+              <li>一句话总结</li>
+              <li>推荐阅读等级</li>
+              <li>相关性标签</li>
+            </ul>
+          </article>
+
+          <article class="guide-card">
+            <p class="value-index">04</p>
+            <h2>如何做决定</h2>
+            <p>进入详情页后，先看阅读建议，再看结构化总结，最后再决定是否点原文。</p>
+            <ul class="signal-list">
+              <li>建议精读：优先投入时间</li>
+              <li>快速浏览：先了解方法或实验设定</li>
+              <li>暂不优先：先放回候选池</li>
+            </ul>
+          </article>
+        </section>
+
+        <section class="guide-faq">
+          <article class="guide-card">
+            <p class="section-kicker">Usage Notes</p>
+            <h2>你可能会看到什么状态</h2>
+            <div class="summary-item">
+              <h3>部分数据源暂时不可用</h3>
+              <p>系统会自动降级，只要还有其他数据源可用，就继续返回结果。</p>
+            </div>
+            <div class="summary-item">
+              <h3>当前未配置数据库</h3>
+              <p>这不影响浏览，但搜索结果不会持久保存到 PostgreSQL。</p>
+            </div>
+            <div class="summary-item">
+              <h3>当前结构化总结为 mock</h3>
+              <p>表示真实 AI summary 还没接入，当前总结只用于演示体验。</p>
+            </div>
+          </article>
+        </section>
+
+        <section class="guide-faq">
+          <article class="guide-card">
+            <p class="section-kicker">Why These Papers</p>
+            <h2>优先阅读建议、相关性和新近度是怎么来的</h2>
+            <div class="summary-item">
+              <h3>优先阅读建议</h3>
+              <p>系统会把相关性分数和新近度分数合并，再结合论文类型做简单加权。若论文属于综述或 benchmark，会额外提高优先级，因为这类论文更适合快速建立方向地图。</p>
+            </div>
+            <div class="summary-item">
+              <h3>相关性</h3>
+              <p>系统会把你的输入主题与论文标题、摘要、一句话总结、关键词和主题标签进行匹配。短语级命中权重更高，只有满足较强语义对齐的论文才会进入结果列表。</p>
+            </div>
+            <div class="summary-item">
+              <h3>新近度</h3>
+              <p>发布时间越近，分数越高。最近 7 天得分最高，其次是 30 天和 90 天，用来优先突出“最近值得跟进”的工作。</p>
+            </div>
+          </article>
+        </section>
+      </section>
+    </template>
+
+    <template id="results-template">
+      <section class="results-layout">
+        <div class="results-main">
+          <div class="query-header" id="query-header"></div>
+          <div id="results-state"></div>
+          <div class="results-content" id="results-content" hidden>
+            <section class="trend-card" id="trend-card"></section>
+            <section class="results-toolbar">
+              <div class="toolbar-group">
+                <label for="sort-select">排序方式</label>
+                <select id="sort-select">
+                  <option value="smart">综合排序</option>
+                  <option value="latest">最新优先</option>
+                </select>
+              </div>
+              <div class="toolbar-group">
+                <label for="range-select">时间范围</label>
+                <select id="range-select">
+                  <option value="7">7 天</option>
+                  <option value="30">30 天</option>
+                  <option value="90">90 天</option>
+                </select>
+              </div>
+              <p class="toolbar-count" id="toolbar-count"></p>
+            </section>
+            <section class="paper-grid" id="paper-grid"></section>
+          </div>
+        </div>
+      </section>
+    </template>
+
+    <template id="detail-template">
+      <section class="detail-layout">
+        <nav class="detail-nav">
+          <button class="ghost-button" id="back-to-results">返回结果页</button>
+          <a class="cta-link" id="paper-link" href="#" target="_blank" rel="noreferrer">
+            查看原文
+          </a>
+        </nav>
+        <div id="detail-state"></div>
+        <article class="detail-content" id="detail-content" hidden>
+          <section class="detail-hero" id="detail-hero"></section>
+          <section class="recommendation-panel" id="recommendation-panel"></section>
+          <section class="detail-grid">
+            <article class="summary-panel" id="summary-panel"></article>
+            <article class="abstract-panel" id="abstract-panel"></article>
+          </section>
+        </article>
+      </section>
+    </template>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
